@@ -295,7 +295,6 @@ makeRequest method req isWantedStatus bUrl = do
   let url = JSString.pack . show  $ buildUrl req bUrl
       methodText = JSString.pack $ unpack method
   jsXhrOpen jRequest methodText url jsTrue
-  jsXhrResponseType jRequest "json"
   resp <- newEmptyMVar
   cb <- syncCallback ThrowWouldBlock $ do
     r <- jsXhrReadyState jRequest :: IO JSVal
