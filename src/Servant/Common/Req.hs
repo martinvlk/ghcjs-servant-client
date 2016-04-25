@@ -216,17 +216,7 @@ foreign import javascript unsafe "$1.responseText"
 jsXhrResponse:: JSVal -> IO JSVal
 jsXhrResponse jsv = [jsu|
 (function () {
-   var contentResponse = typeof `jsv.response;
-   if( contentResponse == "undefined" ) { //This takes care of the lack of a 'response' field in ie9
-    return JSON.parse(`jsv.responseText);
-   }   
-   else if (contentResponse == "string" ) //IE11 bug
-   {   
-    return JSON.parse(`jsv.response);
-   }
-   else {
     return `jsv.response;
-   }
 }())
 |]
                      
