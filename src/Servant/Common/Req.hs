@@ -216,6 +216,22 @@ foreign import javascript unsafe "$1.responseText"
 jsXhrResponse:: JSVal -> IO JSVal
 jsXhrResponse jsv = [jsu|
 (function () {
+   var contentResponse = typeof `jsv.response;
+   if( contentResponse == "undefined" ) { //This takes care of the lack of a 'response' field in ie9
+    return JSON.parse(`jsv.responseText);
+   }   
+   else if (contentResponse == "string" ) //IE11 bug
+   {   
+    return JSON.parse(`jsv.response);
+   }
+   else {
+    return `jsv.response;
+   }
+}())
+|]
+jsXhrErrResponse:: JSVal -> IO JSVal
+jsXhrErrResponse jsv = [jsu|
+(function () {
     return `jsv.response;
 }())
 |]
@@ -298,7 +314,7 @@ makeRequest method req isWantedStatus bUrl = do
           putMVar resp $ Right (statusCode, headers, bsResp)
         else do
           bsStatusText <- jsXhrGetStatusText jRequest
-          respBody <- jsXhrResponse jRequest
+          respBody <- jsXhrErrResponse jRequest
           [js_| console.log(`respBody); |]
           putMVar resp $ Left $ FailureResponse (mkStatus statusCode .
                                                        pack . JSString.unpack $ bsStatusText)
